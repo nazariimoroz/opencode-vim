@@ -61,6 +61,12 @@ Insert-mode mappings support only `normal`, `submit`, `command:<id>`, or Escape
 Mapping sequences are literal: mapping `j` to `j` uses an actual line, while
 mapping it to `gj` uses a wrapped row.
 
+With [layout-independent commands](./configuration.md#keyboard-layout), write
+command mapping keys in canonical US notation: Ukrainian `і` can match `s`.
+Custom mappings still precede the session toggle. Mapping RHS tokens are already
+canonical and are never layout-resolved again. Character-find/replace payloads
+bypass command mappings. Insert mappings remain logical: `ло` does not match `kj`.
+
 Session mappings override defaults: `<Tab>` switches panels where available.
 The example above releases Tab to OpenCode and uses Ctrl+W then w to switch panels.
 Native commands still depend on the current UI context.

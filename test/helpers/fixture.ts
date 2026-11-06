@@ -3,7 +3,7 @@ import { createTestRenderer } from "@opentui/core/testing"
 import type { EditorContext } from "../../src/vim/editor"
 import { createVimConfig, type VimOptions } from "../../src/vim/config"
 import { editInput } from "../../src/vim/edit"
-import { keyNotation } from "../../src/vim/keys"
+import { inputKey } from "../../src/vim/keys"
 import { createVimState } from "../../src/vim/state"
 import { createVimeeAdapter } from "../../src/vim/vimee"
 
@@ -54,7 +54,7 @@ export async function createFixture(
   }
   let handled: boolean | Promise<boolean> = false
   const onKey = (event: KeyEvent) => {
-    const key = keyNotation(event)
+    const key = inputKey(event, config.keyboard, adapter.inputIntent(context))
     handled = key ? adapter.handle(event, key, context) : false
     if (handled) {
       event.preventDefault()

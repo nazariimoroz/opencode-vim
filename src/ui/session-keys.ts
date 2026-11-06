@@ -1,8 +1,8 @@
 import type { Context } from "@opencode/plugin/tui/context"
 import type { KeyEvent } from "@opentui/core"
 import { createKeybindMap, parseKeySequence, type KeybindDefinition } from "@vimee/core"
-import type { SessionAction, VimConfig } from "../vim/config"
-import { keyNotation } from "../vim/keys"
+import type { SessionAction, VimConfig, VimKeyboard } from "../vim/config"
+import { inputKey, type InputIntent } from "../vim/keys"
 
 export function sessionModeKey(
   context: Context,
@@ -10,10 +10,12 @@ export function sessionModeKey(
   sessionKey: string,
   mode: string,
   mapped?: (key: string) => boolean,
+  keyboard?: VimKeyboard,
+  intent: InputIntent = "command",
 ) {
   if (event.defaultPrevented || context.keymap.mode.current() !== mode) return
   if (context.keymap.pending().length || event.super || event.meta) return
-  const key = keyNotation(event)
+  const key = inputKey(event, keyboard, intent)
   if (!key || (key === "<Tab>" && event.shift)) return
   if (mapped?.(key) || key === sessionKey) return key
   if (!event.ctrl || key === "<C-[>") return key

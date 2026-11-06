@@ -143,7 +143,7 @@ export function createSessionMode(context: Context, config: VimConfig, clipboard
 
   const onKey = (event: KeyEvent) => {
     if (!active() || reading()) return
-    const key = sessionModeKey(context, event, config.sessionKey, SESSION_MODE, mappings.accepts)
+    const key = sessionModeKey(context, event, config.sessionKey, SESSION_MODE, mappings.accepts, config.keyboard)
     if (!key) return
     if (mappings.resolve(key) === "passthrough") return
     event.preventDefault()

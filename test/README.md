@@ -77,6 +77,15 @@ Run `bun run typecheck`, `bun run test`, and `bun run test:e2e`. To work on one
 host regression, pass scenario names, for example:
 `bun run test:e2e message-reader session-lifecycle`.
 
+Layout-independent command coverage uses `unit/keys.test.ts`,
+`integration/keyboard.test.ts`, and the reader component tests. Run
+`bun run test:e2e keyboard-prompt keyboard-queue keyboard-reader keyboard-form keyboard-terminal`
+for raw UTF-8 fallback, injected CSI u `baseCode`, payload preservation, queued
+mode transitions, dialogs, transcript/readers, forms, composer, and real child
+PTY passthrough. Injected metadata proves parser/routing only: physical US → UK →
+US input, Shift/Ctrl/Alt, and terminal/tmux/SSH negotiation still need a manual
+check on the user's terminal. Do not log real prompt text to diagnose metadata.
+
 ## Native history contract
 
 OpenTUI restores editor content; the plugin groups native entries into Vim changes

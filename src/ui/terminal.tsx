@@ -34,7 +34,7 @@ export function createTerminalControls(
   function handle(event: KeyEvent) {
     const mode = context.keymap.mode.current()
     if ((mode !== "base" && mode !== SESSION_MODE) || context.keymap.pending().length) return false
-    const key = paneEventKey(event)
+    const key = paneEventKey(event, config.keyboard)
     const command = key ? mappings.command(key) : undefined
     if (!command) return false
     const available = context.keymap.commands()

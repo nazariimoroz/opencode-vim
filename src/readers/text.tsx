@@ -55,7 +55,15 @@ export function TextReader(
   }
   const onKey = (event: KeyEvent) => {
     if (context.renderer.currentFocusedEditor !== input) return
-    const key = sessionModeKey(context, event, props.config.sessionKey, "modal", mappings.accepts)
+    const key = sessionModeKey(
+      context,
+      event,
+      props.config.sessionKey,
+      "modal",
+      mappings.accepts,
+      props.config.keyboard,
+      adapter.inputIntent(editorContext),
+    )
     if (!key) {
       mappings.cancel()
       return

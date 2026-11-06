@@ -14,7 +14,7 @@ import type { VimLog } from "./log"
 import { createNativeHistory, type NativeHistory } from "./history"
 import { createGraphemeCodec } from "./graphemes"
 import { createKeybinds, hasNormalKeyPrefix, insertHostAction, type HostKeybindDefinition } from "./keymaps"
-import { keyForVimee, keyToken, tokenCtrl } from "./keys"
+import { keyForVimee, keyToken, tokenCtrl, type InputIntent } from "./keys"
 import {
   displayToChar,
   displayWidth,
@@ -85,6 +85,10 @@ export function createVimeeAdapter(state: VimState, config: VimConfig, log: VimL
   return {
     attach,
     suspend,
+    inputIntent(ctx?: EditorContext): InputIntent {
+      if (ctx) attach(ctx)
+      return inputIntent()
+    },
     setRegister(text: string) {
       vim = { ...vim, register: codec.encode(text) }
     },
@@ -147,7 +151,7 @@ export function createVimeeAdapter(state: VimState, config: VimConfig, log: VimL
       vimeeKey = textObjectAlias(vimeeKey, vim) ?? vimeeKey
       const textObjectHandled = handleTextObject(vimeeKey, ctx, map)
       if (textObjectHandled !== undefined) return textObjectHandled
-      const resolved = keybinds?.resolve(vimeeKey, vim.mode, event.ctrl)
+      const resolved = inputIntent() === "command" ? keybinds?.resolve(vimeeKey, vim.mode, event.ctrl) : undefined
       if (resolved?.status === "pending") {
         vim = { ...vim, statusMessage: resolved.display }
         state.setPending(resolved.display)
@@ -236,6 +240,25 @@ export function createVimeeAdapter(state: VimState, config: VimConfig, log: VimL
       history = undefined
       activeInput = undefined
     },
+  }
+
+  function inputIntent(): InputIntent {
+    if (state.mode() === "insert") return "literal"
+    // Unknown future phases may contain text: opt in only known command phases.
+    switch (vim.phase) {
+      case "idle":
+      case "operator-pending":
+      case "g-pending":
+      case "text-object-pending":
+      case "register-pending":
+      case "macro-register-pending":
+      case "macro-execute-pending":
+      case "mark-pending":
+      case "jump-mark-pending":
+        return "command"
+      default:
+        return "literal"
+    }
   }
 
   function needsClipboard(key: string, ctrl: boolean, definition?: KeybindDefinition) {
@@ -577,7 +600,8 @@ export function createVimeeAdapter(state: VimState, config: VimConfig, log: VimL
       buffer = new MotionBuffer(before)
       try {
         for (const token of keys) {
-          const result = processKey(codec.encode(keyToken(token)), tokenCtrl(token))
+          // Recorded changes already contain codec tokens, not keyboard input.
+          const result = processKey(keyToken(token), tokenCtrl(token))
           vim = result.newCtx
           actions.push(...result.actions)
         }

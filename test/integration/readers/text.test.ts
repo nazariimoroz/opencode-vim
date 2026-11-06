@@ -1,7 +1,27 @@
 import { expect, test } from "bun:test"
 import { textItem, useReaderFixture } from "../../helpers/reader"
+import { keyEvent } from "../../helpers/key"
 
 const mount = useReaderFixture()
+
+test("layout-independent reader motions retain literal find arguments and session precedence", async () => {
+  const f = await mount(textItem("aіbрcя"), {
+    keyboard: { mode: "layout-independent", fallback: "uk" },
+    keymaps: { session: { h: "passthrough" } },
+  })
+  await f.keys("а")
+  f.renderer.keyInput.emit("keypress", keyEvent("і", { baseCode: 115 }))
+  expect(f.reader().cursorOffset).toBe(1)
+  expect(f.close).not.toHaveBeenCalled()
+  await f.keys("мдн")
+  expect(f.copied).toEqual(["іb"])
+  const event = keyEvent("р", { baseCode: 104 })
+  f.renderer.keyInput.emit("keypress", event)
+  expect(event.defaultPrevented).toBe(false)
+  expect(event.name).toBe("р")
+  await f.keys("і")
+  expect(f.close).toHaveBeenCalledTimes(1)
+})
 
 test("reader selects and copies characters and lines, and remembers its cursor", async () => {
   const f = await mount(textItem("one two\nsecond line"))

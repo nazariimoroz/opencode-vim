@@ -1,6 +1,7 @@
 import type { Context } from "@opencode/plugin/tui/context"
 import type { KeyEvent } from "@opentui/core"
-import { keyNotation } from "../vim/keys"
+import { inputKey } from "../vim/keys"
+import type { VimKeyboard } from "../vim/config"
 import { sendNativeKey, vimArrowKeys } from "./native-keys"
 
 const keys: Record<string, [string, string]> = {
@@ -8,11 +9,11 @@ const keys: Record<string, [string, string]> = {
   "<C-[>": ["escape", "\x1b"],
 }
 
-export function handleComposerKey(context: Context, event: KeyEvent) {
+export function handleComposerKey(context: Context, event: KeyEvent, keyboard?: VimKeyboard) {
   if (context.keymap.mode.current() !== "composer") return false
   if (context.keymap.pending().length || event.meta || event.option || event.super || event.hyper) return true
 
-  const key = keyNotation(event)
+  const key = inputKey(event, keyboard)
   const target = key && keys[key]
   if (!target) return true
 

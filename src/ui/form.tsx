@@ -4,7 +4,7 @@ import { createEffect, onCleanup, Show, untrack } from "solid-js"
 import type { EditorContext } from "../vim/editor"
 import type { VimConfig } from "../vim/config"
 import { editInput } from "../vim/edit"
-import { keyNotation } from "../vim/keys"
+import { inputKey } from "../vim/keys"
 import type { VimLog } from "../vim/log"
 import { createVimState } from "../vim/state"
 import { createVimeeAdapter } from "../vim/vimee"
@@ -148,7 +148,7 @@ export function createFormMode(context: Context, config: VimConfig, log: VimLog,
       return true
     }
     if (context.keymap.pending().length) return true
-    const key = keyNotation(event)
+    const key = inputKey(event, config.keyboard, adapter.inputIntent(editorContext))
     if (!key) return true
 
     if (state.mode() === "insert") {
@@ -194,7 +194,7 @@ export function createFormMode(context: Context, config: VimConfig, log: VimLog,
       consume(event)
       // Keep the native selection shortcut, without triggering the
       // custom row's printable-character interceptor.
-      sendKey(event.name, "")
+      sendKey(key === "<Space>" ? "space" : key, "")
       if (!input) waitForFocus()
     } else if (event.sequence && !/[\p{C}]/u.test(event.sequence) && key !== "<CR>" && key !== "<Tab>") {
       consume(event)

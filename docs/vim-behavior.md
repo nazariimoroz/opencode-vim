@@ -8,6 +8,13 @@ the startup mode, session key, or editing mappings.
 Starts in insert mode. Press `Esc` to enter normal mode and `i` to type again.
 Use `/vim` to toggle the plugin on or off.
 
+Optional [layout-independent commands](./configuration.md#keyboard-layout) keep
+US QWERTY command positions while typing with another layout. Ukrainian fallback
+maps `р/о/л/д` to `h/j/k/l`, but text remains Ukrainian, including the character
+after `f/F/t/T/r`. Dot repeat replays canonical commands and original payloads.
+Insert mappings stay logical; live terminals keep original input except for
+available reserved pane shortcuts. Global OpenCode/OS shortcuts are unchanged.
+
 | Key | Behavior |
 | --- | --- |
 | `Esc`, `Ctrl+[` | Enter normal mode |

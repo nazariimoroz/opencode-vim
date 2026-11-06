@@ -7,6 +7,7 @@ export type VimCursorStyle = {
 }
 
 export type VimConfig = {
+  keyboard: VimKeyboard
   defaultMode: VimMode
   diffView: DiffView
   sessionKey: string
@@ -19,6 +20,7 @@ export type VimConfig = {
 }
 
 export type VimOptions = {
+  keyboard?: Partial<VimKeyboard>
   defaultMode?: VimMode
   diffView?: DiffView
   sessionKey?: string
@@ -31,6 +33,10 @@ export type VimOptions = {
 }
 
 export type DiffView = "after" | "before" | "diff"
+export type VimKeyboard = {
+  mode: "logical" | "layout-independent"
+  fallback: "none" | "uk"
+}
 export type ModeIndicator = "full" | "none"
 export type SessionAction = "switch-panel" | "passthrough"
 export type VimKeymaps = Partial<Record<VimMode, Record<string, VimMappedAction>>> & {
@@ -49,6 +55,7 @@ const DEFAULT_CURSOR_STYLES: Record<VimMode, VimCursorStyle> = {
 export function createVimConfig(options: unknown): VimConfig {
   const input = readOptions(options)
   return {
+    keyboard: { mode: input.keyboard?.mode ?? "logical", fallback: input.keyboard?.fallback ?? "none" },
     defaultMode: input.defaultMode ?? "insert",
     diffView: input.diffView ?? "after",
     sessionKey: input.sessionKey ?? "s",
@@ -73,6 +80,7 @@ function readOptions(options: unknown): VimOptions {
 
   const source = raw as Record<string, unknown>
   return {
+    keyboard: readKeyboard(source.keyboard),
     defaultMode: isMode(source.defaultMode) ? source.defaultMode : undefined,
     diffView:
       source.diffView === "after" || source.diffView === "before" || source.diffView === "diff"
@@ -86,6 +94,15 @@ function readOptions(options: unknown): VimOptions {
     debug: typeof source.debug === "boolean" ? source.debug : undefined,
     debugPath: typeof source.debugPath === "string" ? source.debugPath : undefined,
     keymaps: readKeymaps(source.keymaps),
+  }
+}
+
+function readKeyboard(input: unknown): VimOptions["keyboard"] {
+  if (!input || typeof input !== "object") return
+  const source = input as Record<string, unknown>
+  return {
+    mode: source.mode === "layout-independent" ? "layout-independent" : "logical",
+    fallback: source.fallback === "uk" ? "uk" : "none",
   }
 }
 

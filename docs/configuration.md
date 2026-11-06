@@ -33,9 +33,53 @@ All options below belong inside `options.vim`.
 | `diffView` | `"after"` | Starting edit/patch view: `"after"`, `"before"`, or `"diff"`; added/deleted files use the available side |
 | `keymapTimeout` | `500` | Milliseconds to wait for the rest of a custom mapping |
 | `keymaps` | `{}` | Custom mappings, grouped by mode |
+| `keyboard.mode` | `"logical"` | `"layout-independent"` resolves commands to US QWERTY; `"logical"` keeps the existing behavior |
+| `keyboard.fallback` | `"none"` | Explicit `"uk"` letter-position fallback when usable terminal metadata is missing |
 | `cursorStyles` | See below | Cursor appearance for each editing mode |
 | `debug` | `false` | Enable debug logging |
 | `debugPath` | `~/.cache/opencode/opencode-vim.log` | Debug log file |
+
+### Keyboard layout
+
+To use US QWERTY command positions with a standard Ukrainian layout, add this
+inside `options.vim` (in a build containing this feature):
+
+```json
+{
+  "keyboard": { "mode": "layout-independent", "fallback": "uk" }
+}
+```
+
+Commands first use the terminal's optional `baseCode` (base-layout Unicode
+codepoint, not a hardware scancode). Printable ASCII metadata takes priority over
+the fallback and uses US Shift positions, such as `[` → `{` and `1` → `!`.
+Caps Lock does not replace Shift in this command path; literal payloads keep
+their actual case. Named keys keep their normal handling.
+The plugin does not change terminal keyboard negotiation or your OS layout.
+Support depends on alternate-key reporting by the host, terminal, and any tmux/SSH
+connection; a terminal name alone does not establish support.
+
+The `uk` fallback assumes these standard Ukrainian letter positions:
+
+| Ukrainian | US QWERTY |
+| --- | --- |
+| `йцукенгшщзхї` | `qwertyuiop[]` |
+| `фівапролджє` | `asdfghjkl;'` |
+| `ячсмитьбю` | `zxcvbnm,.` |
+
+Uppercase letters use US shifted positions (`Р` → `H`, `Х` → `{`, `Ж` → `:`,
+`Є` → `"`, `Б` → `<`, `Ю` → `>`). Unknown letters are not guessed. ASCII
+punctuation and digits are unchanged without metadata: legacy `.` cannot tell
+US dot-repeat from the Ukrainian key at the US `/` position. Some Ctrl chords
+are also ambiguous. This fallback is not full physical-key independence.
+
+Normal/visual commands, command mappings, session/readers, dialog navigation,
+question forms, composer navigation, and already-reserved available pane bindings
+use the resolver. Insert text and insert mappings remain logical. The character
+after `f/F/t/T/r` stays literal, including after an operator; registers, supported
+macro registers, and marks use the canonical Latin namespace. Paste, clipboard,
+attachments, and unhandled host/child input are not transliterated. Unknown
+keyboard option values safely use their defaults; the feature is off by default.
 
 ### Session key
 

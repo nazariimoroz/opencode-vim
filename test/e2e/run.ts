@@ -45,6 +45,7 @@ import { permissionMessages } from "./data/permission"
 import { permissionTools } from "./scenarios/permission-tools"
 import { clipboardCancellation } from "./scenarios/clipboard-cancel"
 import { questionForms } from "./scenarios/question-forms"
+import { keyboardPrompt, keyboardQueue, keyboardReader, keyboardForm, keyboardTerminal } from "./scenarios/keyboard"
 import { composerNavigation } from "./scenarios/composer-navigation"
 import {
   terminalFocus,
@@ -61,6 +62,42 @@ const scenarios: Array<{
   source?: boolean
   setup?: FixtureSetup
 }> = [
+  {
+    name: "keyboard-prompt",
+    run: keyboardPrompt,
+    setup: {
+      probe: true,
+      vim: {
+        defaultMode: "normal",
+        keyboard: { mode: "layout-independent", fallback: "uk" },
+        keymaps: { insert: { kj: "normal" }, normal: { s: "x" } },
+      },
+    },
+  },
+  {
+    name: "keyboard-queue",
+    run: keyboardQueue,
+    setup: { probe: true, delayedClipboard: true, vim: { keyboard: { mode: "layout-independent", fallback: "uk" } } },
+  },
+  {
+    name: "keyboard-reader",
+    run: keyboardReader,
+    setup: { probe: true, messages: readerMessages, vim: { keyboard: { mode: "layout-independent", fallback: "uk" } } },
+  },
+  {
+    name: "keyboard-form",
+    run: keyboardForm,
+    setup: { vim: { keyboard: { mode: "layout-independent", fallback: "uk" }, keymaps: { insert: { kj: "normal" } } } },
+  },
+  {
+    name: "keyboard-terminal",
+    run: keyboardTerminal,
+    setup: {
+      probe: true,
+      cli: { session: { terminal: true } },
+      vim: { keyboard: { mode: "layout-independent", fallback: "uk" } },
+    },
+  },
   {
     name: "prompt-input",
     run: promptInput,

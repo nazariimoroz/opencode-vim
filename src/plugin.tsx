@@ -6,7 +6,7 @@ import { createEffect, createSignal, onCleanup, untrack } from "solid-js"
 import type { EditorContext } from "./vim/editor"
 import { createVimConfig } from "./vim/config"
 import { editInput } from "./vim/edit"
-import { keyNotation } from "./vim/keys"
+import { inputKey } from "./vim/keys"
 import { createVimLog } from "./vim/log"
 import { displayToChar } from "./vim/map"
 import { createVimState, type VimMode } from "./vim/state"
@@ -118,7 +118,7 @@ function VimHost(props: { context: Context }) {
     if (!enabled() || event.defaultPrevented) return
     if (terminal.handle(event)) return
     if (form.handle(event)) return
-    if (handleComposerKey(props.context, event)) return
+    if (handleComposerKey(props.context, event, config.keyboard)) return
     if (pendingKeys) {
       pendingKeys.push(new KeyEvent(event))
       event.preventDefault()
@@ -130,7 +130,7 @@ function VimHost(props: { context: Context }) {
     if (!kind) return
     if (props.context.keymap.pending().length) return
     const { state, vimee } = kind === "dialog" ? dialogVim : promptVim
-    const key = keyNotation(event)
+    const key = inputKey(event, config.keyboard, vimee.inputIntent(editorContext))
     if (!key) return
     const mapped = normalMappings.some((sequence) => sequence.startsWith(key))
     if (kind === "prompt" && key === config.sessionKey && !mapped && state.mode() === "normal" && !vimee.isPending()) {
